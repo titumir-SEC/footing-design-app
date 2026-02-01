@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isolated Spread Footing Design App</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(to right, #2c3e50, #4a6491);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-section, .results-section {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 1rem;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .unit {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-left: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        #calculateBtn {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+        }
+
+        #calculateBtn:hover {
+            background: linear-gradient(to right, #2980b9, #1c5a7a);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        #resetBtn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        #resetBtn:hover {
+            background: linear-gradient(to right, #c0392b, #a93226);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .result-item {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-title {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-value {
+            font-size: 1.4rem;
+            color: #27ae60;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .result-equation {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            border-left: 3px solid #3498db;
+        }
+
+        .status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .status-ok {
+            background-color: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .status-warning {
+            background-color: #fef5e7;
+            color: #f39c12;
+        }
+
+        .status-error {
+            background-color: #fde8e8;
+            color: #e74c3c;
+        }
+
+        .footing-visualization {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background-color: #ddd;
+            z-index: 1;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ddd;
+            color: #777;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto 10px;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-circle {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .step.active .step-label {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .notes {
+            background-color: #fffde7;
+            border-left: 5px solid #f1c40f;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+        }
+
+        .notes p {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Isolated Spread Footing Design App</h1>
+            <p>Based on ACI 318 Code - Design of concentrically loaded isolated spread footings with flexural reinforcement calculation</p>
+        </header>
+
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                <div class="step-circle">1</div>
+                <div class="step-label">Input Parameters</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-circle">2</div>
+                <div class="step-label">Footing Size</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-circle">3</div>
+                <div class="step-label">Shear Check</div>
+            </div>
+            <div class="step" id="step4">
+                <div class="step-circle">4</div>
+                <div class="step-label">Reinforcement</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <h2 class="section-title"><i class="fas fa-sliders-h"></i> Design Input Parameters</h2>
+                
+                <div class="input-group">
+                    <label>Service Dead Load (P<sub>D</sub>) <span class="unit">(kips)</span></label>
+                    <input type="number" id="deadLoad" value="175" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Service Live Load (P<sub>L</sub>) <span class="unit">(kips)</span></label>
+                    <input type="number" id="liveLoad" value="125" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Concrete Compressive Strength (f'<sub>c</sub>) <span class="unit">(psi)</span></label>
+                    <input type="number" id="fc" value="4000" step="100">
+                </div>
+                
+                <div class="input-group">
+                    <label>Steel Yield Strength (f<sub>y</sub>) <span class="unit">(psi)</span></label>
+                    <input type="number" id="fy" value="60000" step="1000">
+                </div>
+                
+                <div class="input-group">
+                    <label>Allowable Soil Pressure (q<sub>a</sub>) <span class="unit">(tsf)</span></label>
+                    <input type="number" id="qa" value="2.0" step="0.1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Soil Density (γ<sub>s</sub>) <span class="unit">(pcf)</span></label>
+                    <input type="number" id="gammaSoil" value="120" step="5">
+                </div>
+                
+                <div class="input-group">
+                    <label>Concrete Density (γ<sub>c</sub>) <span class="unit">(pcf)</span></label>
+                    <input type="number" id="gammaConcrete" value="145" step="5">
+                </div>
+                
+                <div class="input-group">
+                    <label>Footing Depth Below Grade <span class="unit">(inches)</span></label>
+                    <input type="number" id="depthBelowGrade" value="48" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Column Size <span class="unit">(inches)</span></label>
+                    <input type="number" id="columnSize" value="22" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Initial Footing Thickness <span class="unit">(inches)</span></label>
+                    <input type="number" id="footingThickness" value="18" step="1">
+                </div>
+
+                <div class="button-group">
+                    <button id="calculateBtn"><i class="fas fa-calculator"></i> Calculate Design</button>
+                    <button id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+                </div>
+
+                <div class="notes">
+                    <p><strong>Note:</strong> This design follows ACI 318 code requirements for isolated spread footings.</p>
+                    <p>Default values are from Example 10.2 in the provided PDF.</p>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Design Results</h2>
+                
+                <div class="result-item">
+                    <div class="result-title">Effective Soil Pressure (q<sub>e</sub>)</div>
+                    <div class="result-value" id="qeResult">-</div>
+                    <div class="result-equation" id="qeEquation"></div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-title">Required Footing Area</div>
+                    <div class="result-value" id="areaResult">-</div>
+                    <div class="result-equation" id="areaEquation"></div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-title">Footing Dimensions (Square)</div>
+                    <div class="result-value" id="dimensionResult">-</div>
+                    <div class="result-equation" id="dimensionEquation"></div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-title">Ultimate Soil Pressure (q<sub>u</sub>)</div>
+                    <div class="result-value" id="quResult">-</div>
+                    <div class="result-equation" id="quEquation"></div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-title">Punching Shear Check</div>
+                    <div class="result-value" id="punchingShearResult">-</div>
+                    <div class="result-equation" id="punchingShearEquation"></div>
+                    <div class="status" id="punchingShearStatus">-</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-title">Beam Shear Check</div>
+                    <div class="result-value" id="beamShearResult">-</div>
+                    <div class="result-equation" id="beamShearEquation"></div>
+                    <div class="status" id="beamShearStatus">-</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-title">Required Flexural Reinforcement</div>
+                    <div class="result-value" id="reinforcementResult">-</div>
+                    <div class="result-equation" id="reinforcementEquation"></div>
+                    <div class="status" id="reinforcementStatus">-</div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-title">Recommended Reinforcement</div>
+                    <div class="result-value" id="recommendedReinforcement">-</div>
+                    <div class="result-equation" id="spacingEquation"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footing-visualization">
+            <h2 class="section-title"><i class="fas fa-drafting-compass"></i> Footing Visualization</h2>
+            <div class="canvas-container">
+                <canvas id="footingCanvas"></canvas>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Isolated Spread Footing Design App - Based on ACI 318 Code | For educational and professional use</p>
+            <p>Always verify designs with a licensed structural engineer before construction.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add Font Awesome icons
+        const fontAwesome = document.createElement('link');
+        fontAwesome.rel = 'stylesheet';
+        fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(fontAwesome);
+
+        // DOM Elements
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const canvas = document.getElementById('footingCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Update canvas size
+        function resizeCanvas() {
+            const container = document.querySelector('.canvas-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            drawFooting();
+        }
+
+        // Initialize canvas
+        window.addEventListener('load', resizeCanvas);
+        window.addEventListener('resize', resizeCanvas);
+
+        // Draw footing visualization
+        function drawFooting(footingSize = 9.5, columnSize = 22, thickness = 18) {
+            if (!ctx) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Scale factors
+            const scale = Math.min(canvas.width, canvas.height * 0.8) / (footingSize * 12);
+            const footingWidth = footingSize * 12 * scale;
+            const columnWidth = columnSize * scale;
+            const footingThickness = thickness * scale;
+            
+            // Center drawing
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // Draw footing (top view)
+            ctx.fillStyle = '#a1887f';
+            ctx.fillRect(centerX - footingWidth/2, centerY - footingWidth/2, footingWidth, footingWidth);
+            
+            // Draw column
+            ctx.fillStyle = '#78909c';
+            ctx.fillRect(centerX - columnWidth/2, centerY - columnWidth/2, columnWidth, columnWidth);
+            
+            // Draw reinforcement grid
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            const barSpacing = footingWidth / 8;
+            
+            // Vertical bars
+            for (let i = 1; i < 8; i++) {
+                const x = centerX - footingWidth/2 + i * barSpacing;
+                ctx.beginPath();
+                ctx.moveTo(x, centerY - footingWidth/2);
+                ctx.lineTo(x, centerY + footingWidth/2);
+                ctx.stroke();
+            }
+            
+            // Horizontal bars
+            for (let i = 1; i < 8; i++) {
+                const y = centerY - footingWidth/2 + i * barSpacing;
+                ctx.beginPath();
+                ctx.moveTo(centerX - footingWidth/2, y);
+                ctx.lineTo(centerX + footingWidth/2, y);
+                ctx.stroke();
+            }
+            
+            // Draw labels
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${footingSize.toFixed(1)} ft`, centerX, centerY - footingWidth/2 - 10);
+            ctx.fillText(`${footingSize.toFixed(1)} ft`, centerX + footingWidth/2 + 30, centerY);
+            
+            ctx.fillStyle = '#34495e';
+            ctx.fillText(`${columnSize}"`, centerX, centerY);
+        }
+
+        // Calculate footing design
+        function calculateFootingDesign() {
+            // Get input values
+            const P_D = parseFloat(document.getElementById('deadLoad').value);
+            const P_L = parseFloat(document.getElementById('liveLoad').value);
+            const f_c = parseFloat(document.getElementById('fc').value);
+            const f_y = parseFloat(document.getElementById('fy').value);
+            const q_a = parseFloat(document.getElementById('qa').value);
+            const gamma_s = parseFloat(document.getElementById('gammaSoil').value);
+            const gamma_c = parseFloat(document.getElementById('gammaConcrete').value);
+            const depthBelowGrade = parseFloat(document.getElementById('depthBelowGrade').value);
+            const columnSize = parseFloat(document.getElementById('columnSize').value);
+            const footingThickness = parseFloat(document.getElementById('footingThickness').value);
+            
+            // Convert to consistent units
+            const q_a_psf = q_a * 2000; // tsf to psf
+            const h_footing_ft = footingThickness / 12;
+            const h_soil_ft = (depthBelowGrade - footingThickness) / 12;
+            
+            // Step 1: Effective soil pressure
+            const q_e_psf = q_a_psf - h_footing_ft * gamma_c - h_soil_ft * gamma_s;
+            const q_e_ksf = q_e_psf / 1000;
+            
+            // Update step indicator
+            document.getElementById('step1').classList.add('active');
+            
+            // Step 2: Required footing area
+            const totalLoad = P_D + P_L;
+            const requiredArea = totalLoad / q_e_ksf;
+            
+            document.getElementById('step2').classList.add('active');
+            
+            // Step 3: Footing dimensions (square)
+            const sideLength = Math.sqrt(requiredArea);
+            const roundedSideLength = Math.ceil(sideLength * 2) / 2; // Round up to nearest 0.5 ft
+            const actualArea = roundedSideLength * roundedSideLength;
+            
+            // Step 4: Ultimate soil pressure
+            const P_u = 1.2 * P_D + 1.6 * P_L;
+            const q_u = P_u / actualArea;
+            
+            // Step 5: Punching shear check
+            const d = footingThickness - 3.25; // Effective depth (assuming 3.25" cover)
+            const b_o = 4 * (columnSize + d); // Critical perimeter
+            const b_o_ft = b_o / 12;
+            
+            // Punching shear area
+            const punchingShearArea = actualArea - Math.pow((columnSize + d) / 12, 2);
+            const V_u_punching = q_u * punchingShearArea;
+            
+            // Punching shear capacity
+            const phi_V_c_punching = 0.75 * 4 * 1.0 * Math.sqrt(f_c) * b_o * d / 1000; // in kips
+            const punchingShearOK = phi_V_c_punching > V_u_punching;
+            
+            document.getElementById('step3').classList.add('active');
+            
+            // Step 6: Beam shear check
+            const distanceFromColumn = (roundedSideLength * 12 - columnSize) / 2 - d;
+            const distanceFromColumn_ft = distanceFromColumn / 12;
+            const beamShearArea = distanceFromColumn_ft * roundedSideLength;
+            const V_u_beam = q_u * beamShearArea;
+            
+            // Beam shear capacity
+            const b_w = roundedSideLength * 12; // Width in inches
+            const phi_V_c_beam = 0.75 * 2 * 1.0 * Math.sqrt(f_c) * b_w * d / 1000; // in kips
+            const beamShearOK = phi_V_c_beam > V_u_beam;
+            
+            // Step 7: Flexural reinforcement
+            const cantileverLength = (roundedSideLength * 12 - columnSize) / 2;
+            const cantileverLength_ft = cantileverLength / 12;
+            
+            // Moment per foot width
+            const M_u_total = q_u * roundedSideLength * Math.pow(cantileverLength_ft, 2) / 2;
+            const M_u_per_foot = M_u_total / roundedSideLength;
+            
+            // Convert to in-lbs
+            const M_u_inlbs = M_u_per_foot * 12000; // ft-kips to in-lbs
+            
+            // Calculate required reinforcement
+            const phi_flexure = 0.9;
+            const R_u = M_u_inlbs / (phi_flexure * 12 * d * d);
+            
+            // Steel ratio
+            const rho_actual = (0.85 * f_c / f_y) * 
+                (1 - Math.sqrt(1 - (2 * R_u) / (0.85 * f_c)));
+            
+            // Minimum steel ratio
+            const rho_min = 0.0018;
+            const rho_t = 0.319 * 0.85 * (f_c / f_y); // Tension-controlled limit
+            
+            // Required steel area
+            const A_s_required = Math.max(rho_actual, rho_min) * 12 * d;
+            
+            // Check if tension-controlled
+            const tensionControlled = rho_actual < rho_t;
+            
+            // Reinforcement spacing
+            const A_s_bar = 0.44; // Area of #6 bar
+            const spacing = Math.min(12, Math.floor((A_s_bar / A_s_required) * 12));
+            const A_s_actual = (A_s_bar / spacing) * 12;
+            
+            document.getElementById('step4').classList.add('active');
+            
+            // Update results
+            document.getElementById('qeResult').textContent = `${q_e_ksf.toFixed(2)} ksf`;
+            document.getElementById('qeEquation').innerHTML = 
+                `q<sub>e</sub> = q<sub>a</sub> - weight of concrete - weight of soil = ${q_a} tsf × 2000 - ${h_footing_ft.toFixed(2)} ft × ${gamma_c} pcf - ${h_soil_ft.toFixed(2)} ft × ${gamma_s} pcf = ${q_e_psf.toFixed(0)} psf = ${q_e_ksf.toFixed(2)} ksf`;
+            
+            document.getElementById('areaResult').textContent = `${requiredArea.toFixed(1)} ft²`;
+            document.getElementById('areaEquation').innerHTML = 
+                `Required Area = (P<sub>D</sub> + P<sub>L</sub>) / q<sub>e</sub> = (${P_D} + ${P_L}) k / ${q_e_ksf.toFixed(2)} ksf = ${requiredArea.toFixed(1)} ft²`;
+            
+            document.getElementById('dimensionResult').textContent = `${roundedSideLength.toFixed(1)} ft × ${roundedSideLength.toFixed(1)} ft`;
+            document.getElementById('dimensionEquation').innerHTML = 
+                `Side Length = √${requiredArea.toFixed(1)} = ${sideLength.toFixed(2)} ft → Rounded up to ${roundedSideLength.toFixed(1)} ft`;
+            
+            document.getElementById('quResult').textContent = `${q_u.toFixed(2)} ksf`;
+            document.getElementById('quEquation').innerHTML = 
+                `q<sub>u</sub> = P<sub>u</sub> / (B × L) = [1.2(${P_D}) + 1.6(${P_L})] / (${roundedSideLength.toFixed(1)} × ${roundedSideLength.toFixed(1)}) = ${P_u.toFixed(0)} k / ${actualArea.toFixed(1)} ft² = ${q_u.toFixed(2)} ksf`;
+            
+            document.getElementById('punchingShearResult').textContent = `V<sub>u</sub> = ${V_u_punching.toFixed(0)} k, φV<sub>n</sub> = ${phi_V_c_punching.toFixed(0)} k`;
+            document.getElementById('punchingShearEquation').innerHTML = 
+                `φV<sub>n</sub> = φ × 4 × λ × √f'<sub>c</sub> × b<sub>o</sub> × d = 0.75 × 4 × 1.0 × √${f_c} × ${b_o.toFixed(0)}" × ${d.toFixed(2)}" / 1000`;
+            
+            const punchingStatus = document.getElementById('punchingShearStatus');
+            punchingStatus.textContent = punchingShearOK ? 'OK - Adequate for punching shear' : 'NOT OK - Increase footing thickness';
+            punchingStatus.className = punchingShearOK ? 'status status-ok' : 'status status-error';
+            
+            document.getElementById('beamShearResult').textContent = `V<sub>u</sub> = ${V_u_beam.toFixed(1)} k, φV<sub>n</sub> = ${phi_V_c_beam.toFixed(1)} k`;
+            document.getElementById('beamShearEquation').innerHTML = 
+                `φV<sub>n</sub> = φ × 2 × λ × √f'<sub>c</sub> × b<sub>w</sub> × d = 0.75 × 2 × 1.0 × √${f_c} × ${b_w.toFixed(0)}" × ${d.toFixed(2)}" / 1000`;
+            
+            const beamStatus = document.getElementById('beamShearStatus');
+            beamStatus.textContent = beamShearOK ? 'OK - Adequate for beam shear' : 'NOT OK - Increase footing thickness';
+            beamStatus.className = beamShearOK ? 'status status-ok' : 'status status-error';
+            
+            document.getElementById('reinforcementResult').textContent = `ρ = ${rho_actual.toFixed(4)}, A<sub>s</sub> = ${A_s_required.toFixed(2)} in²/ft`;
+            document.getElementById('reinforcementEquation').innerHTML = 
+                `ρ = (0.85f'<sub>c</sub>/f<sub>y</sub>)[1 - √(1 - 2R<sub>u</sub>/0.85f'<sub>c</sub>)] = (0.85×${f_c}/${f_y})[1 - √(1 - 2×${R_u.toFixed(4)}/0.85×${f_c})]`;
+            
+            const reinforcementStatus = document.getElementById('reinforcementStatus');
+            if (rho_actual < rho_min) {
+                reinforcementStatus.textContent = `ρ (${rho_actual.toFixed(4)}) < ρ_min (${rho_min}) → Use ρ_min`;
+                reinforcementStatus.className = 'status status-warning';
+            } else if (!tensionControlled) {
+                reinforcementStatus.textContent = `ρ (${rho_actual.toFixed(4)}) > ρ_t (${rho_t.toFixed(4)}) → Not tension-controlled`;
+                reinforcementStatus.className = 'status status-warning';
+            } else {
+                reinforcementStatus.textContent = `OK - ρ_min = ${rho_min}, ρ_t = ${rho_t.toFixed(4)}, Tension-controlled`;
+                reinforcementStatus.className = 'status status-ok';
+            }
+            
+            document.getElementById('recommendedReinforcement').textContent = `#6 @ ${spacing}" O.C. Each Way`;
+            document.getElementById('spacingEquation').innerHTML = 
+                `Spacing = (A<sub>s,bar</sub> / A<sub>s,required</sub>) × 12" = (${A_s_bar} / ${A_s_required.toFixed(2)}) × 12 = ${((A_s_bar / A_s_required) * 12).toFixed(1)}" → Use ${spacing}"`;
+            
+            // Update visualization
+            drawFooting(roundedSideLength, columnSize, footingThickness);
+            
+            // Render MathJax
+            if (window.MathJax) {
+                MathJax.typeset();
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('deadLoad').value = '175';
+            document.getElementById('liveLoad').value = '125';
+            document.getElementById('fc').value = '4000';
+            document.getElementById('fy').value = '60000';
+            document.getElementById('qa').value = '2.0';
+            document.getElementById('gammaSoil').value = '120';
+            document.getElementById('gammaConcrete').value = '145';
+            document.getElementById('depthBelowGrade').value = '48';
+            document.getElementById('columnSize').value = '22';
+            document.getElementById('footingThickness').value = '18';
+            
+            // Reset results
+            document.querySelectorAll('.result-value').forEach(el => el.textContent = '-');
+            document.querySelectorAll('.result-equation').forEach(el => el.textContent = '');
+            document.querySelectorAll('.status').forEach(el => {
+                el.textContent = '-';
+                el.className = 'status';
+            });
+            
+            // Reset step indicators
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Reset visualization
+            drawFooting();
+        }
+
+        // Event listeners
+        calculateBtn.addEventListener('click', calculateFootingDesign);
+        resetBtn.addEventListener('click', resetForm);
+
+        // Initialize with example values
+        calculateFootingDesign();
+    </script>
+</body>
+</html>
